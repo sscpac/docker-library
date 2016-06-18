@@ -1,4 +1,5 @@
 FROM php:5.6-fpm
+MAINTAINER SSC Pacific
 
 RUN apt-get update && apt-get install -y \
 	bzip2 \
@@ -29,11 +30,8 @@ RUN { \
 	} > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
 # PECL extensions
-#RUN pecl install APCu-4.0.10 redis memcached \
-#	&& docker-php-ext-enable apcu redis memcached
-# removed REDIS due to failure installing
-RUN pecl install APCu-4.0.10 memcached \
-	&& docker-php-ext-enable apcu memcached
+RUN pecl install APCu-4.0.10 redis-2.2.8 memcached \
+	&& docker-php-ext-enable apcu redis memcached
 
 ENV OWNCLOUD_VERSION 9.0.2
 VOLUME /var/www/html
