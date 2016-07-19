@@ -1,4 +1,4 @@
-FROM php:5.6-fpm
+FROM php:5.6-apache
 MAINTAINER SSC Pacific
 
 RUN apt-get update && apt-get install -y \
@@ -33,6 +33,8 @@ RUN { \
 RUN pecl install APCu-4.0.10 redis-2.2.8 memcached \
 	&& docker-php-ext-enable apcu redis memcached
 
+RUN a2enmod rewrite
+
 ENV OWNCLOUD_VERSION 9.0.2
 VOLUME /var/www/html
 
@@ -65,14 +67,14 @@ RUN curl -fsSL -o owncloud.tar.gz \
 	# sscpac calendar application
 	# eventually we should run the Makefile to package only the necessary files.   Makefile uses --exclude-vcs-ignores
 	# that is not available with the base image's version of tar.  The ignores option excludes files in .gitignore
-	&& curl -fsSL -o calendar.tar.gz \ 
+	&& curl -fsSL -o owncloud-calendar.tar.gz \ 
 	    "https://github.com/sscpac/owncloud-calendar/archive/v1.0.tar.gz" \
-	&& tar -xzf calendar.tar.gz -C /usr/src/owncloud/apps/ \
-	&& mv /usr/src/owncloud/apps/owncloud-calendar-1.0 /usr/src/owncloud/apps/calendar/ \
-	&& rm -rf calendar.* 
+	&& tar -xzf owncloud-calendar.tar.gz \
+	&& mv ./owncloud-calendar-1.0/app /usr/src/owncloud/apps/calendar/ \
+	&& rm -rf owncloud-calendar*  
 
 COPY docker-entrypoint.sh /entrypoint.sh
 RUN chmod u+x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["php-fpm"]
+CMD ["apache2-foreground"]
