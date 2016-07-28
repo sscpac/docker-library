@@ -1,18 +1,18 @@
 #!/bin/sh
 
 CATALINA_OPTS="
-    -Djavax.net.ssl.trustStore=\"$CATALINA_HOME/certs/keystore.jks\"
-    -Djavax.net.ssl.keyStore=\"$CATALINA_HOME/certs/keystore.jks\"
-    -Djavax.net.ssl.keyStorePassword=password
+    -Djavax.net.ssl.trustStore=\"$CATALINA_HOME/certs/truststore.jks\"
     -Djavax.net.ssl.trustStorePassword=password
-    -Xmx1024m
-    -Xms512m
-    -XX:PermSize=128m
-    -XX:MaxPermSize=256m
     -XX:+UseConcMarkSweepGC
     -XX:+ExplicitGCInvokesConcurrent
     $CATALINA_OPTS
 "
+
+#    -Xmx1024m
+#    -Xms512m
+#    -XX:PermSize=128m
+#    -XX:MaxPermSize=256m
+
 
 #
 # High Performance EXAMPLE CATALINA_OPTS Settings (Notice, Xmx == Xms):

@@ -19,19 +19,16 @@ RUN  echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/reposito
     | gunzip \
     | tar x -C /usr/ \
     && mv /usr/apache-tomcat* $CATALINA_HOME \
-    && rm -rf $CATALINA_HOME/webapps/* $CATALINA_HOME/conf/server.xml \
+    && rm -rf $CATALINA_HOME/webapps/* \
     && chmod +x /usr/local/bin/run.sh \
     && touch /.firstrun 
 
 RUN curl -fsSL -o $CATALINA_HOME/webapps/soaf.war \
-        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/soaf-services-webapp/1.0.0/soaf-services-webapp-1.0.0.war" \
+        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/soaf-services-webapp/1.0.1/soaf-services-webapp-1.0.1.war" \
 	&& curl -fsSL -o $CATALINA_HOME/webapps/examples.war \
-        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/soaf-examples-webapp/1.0.0/soaf-examples-webapp-1.0.0.war" \
-	&& curl -fsSL -o $CATALINA_HOME/webapps/cas.war \
-        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/cas-overlay/1.0-SNAPSHOT/cas-overlay-1.0-20160707.225430-1.war" 
+        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/soaf-examples-webapp/1.0.1/soaf-examples-webapp-1.0.1.war"  
 
-ADD conf/server.xml $CATALINA_HOME/conf/
-ADD conf/keystore.jks $CATALINA_HOME/certs/
+ADD conf/truststore.jks $CATALINA_HOME/certs/
 ADD conf/setenv.sh $CATALINA_HOME/bin/
 
 RUN dos2unix $CATALINA_HOME/bin/setenv.sh /usr/local/bin/run.sh
