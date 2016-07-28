@@ -34,7 +34,8 @@ RUN pecl install APCu-4.0.10 redis-2.2.8 memcached \
 	&& docker-php-ext-enable apcu redis memcached
 
 ENV OWNCLOUD_VERSION 9.0.2
-VOLUME /var/www/html
+VOLUME /var/www/owncloud
+WORKDIR /var/www/owncloud
 
 # Install sscpac/owncloud-core, sscpac/owncloud-calendar, and owncloud/owncloud-3rdparty
 # using source release from GitHub. Eventually the sscpac/owncloud-* should be built from
