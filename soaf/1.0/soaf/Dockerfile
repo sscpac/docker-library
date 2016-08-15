@@ -1,4 +1,6 @@
-FROM java:8-jre-alpine
+FROM tomcat:jre8-alpine
+
+ENV SOAF_VERSION 1.0.2 
 
 ADD dump /dump
 ADD run.sh /usr/local/bin/
@@ -7,11 +9,11 @@ RUN  echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/reposito
     && apk add --update curl mongodb-tools netcat-openbsd \
     && rm -rf $CATALINA_HOME/webapps/* \
     && chmod +x /usr/local/bin/run.sh \
-    && touch /.firstrun 
+    && touch /.firstrun \ 
     && curl -fsSL -o $CATALINA_HOME/webapps/soaf.war \
-        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/soaf-services-webapp/1.0.1/soaf-services-webapp-1.0.1.war" \
+        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/soaf-services-webapp/$SOAF_VERSION/soaf-services-webapp-$SOAF_VERSION.war" \
     && curl -fsSL -o $CATALINA_HOME/webapps/examples.war \
-        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/soaf-examples-webapp/1.0.1/soaf-examples-webapp-1.0.1.war"  
+        "https://oss.sonatype.org/content/groups/public/mil/navy/spawar/soaf/soaf-examples-webapp/$SOAF_VERSION/soaf-examples-webapp-$SOAF_VERSION.war"  
 
 ADD conf/truststore.jks $CATALINA_HOME/certs/
 ADD conf/setenv.sh $CATALINA_HOME/bin/
