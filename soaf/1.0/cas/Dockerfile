@@ -1,6 +1,6 @@
 FROM tomcat:jre8-alpine
 
-ENV CAS_VERSION 1.0.5
+ENV CAS_VERSION 1.0.6
 
 RUN rm -rf $CATALINA_HOME/webapps/*  \
     && apk add --update curl 
