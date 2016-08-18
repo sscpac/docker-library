@@ -82,7 +82,7 @@ RUN curl -fsSL -o owncloud.tar.gz \
 	# install user_cas application that defers owncloud authentication to CAS server
 	&& curl -fsSL -o user_cas.tar.gz "https://github.com/sscpac/user_cas/archive/v${USER_CAS_VERSION}.tar.gz" \
 	&& tar -xzf user_cas.tar.gz \
-	&& mv ./user_cas-${USER_CAS_VERSION} /usr/src/owncloud/apps/user_cas \
+	&& mv ./user_cas-${USER_CAS_VERSION}/app /usr/src/owncloud/apps/user_cas \
 	&& rm -rf user_cas* 
 
 COPY docker-entrypoint.sh /entrypoint.sh
