@@ -1,6 +1,6 @@
 FROM tomcat:jre8-alpine
 
-ENV SOAF_VERSION 1.0.2 
+ENV SOAF_VERSION 1.0.3 
 
 ADD dump /dump
 ADD run.sh /usr/local/bin/
