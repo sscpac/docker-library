@@ -2,7 +2,7 @@
 set -e
 
 if [ ! -e '/var/www/html/owncloud/version.php' ]; then
-	cp -r /usr/src/owncloud .
+	cp -r /usr/src/owncloud/* /var/www/html/ 
 
 	chown -R apache:www-data /var/www/html
 
