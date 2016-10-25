@@ -6,4 +6,5 @@ RUN apk upgrade --update \
 
 VOLUME /data/db
 
+EXPOSE 27017
 ENTRYPOINT /usr/bin/mongod

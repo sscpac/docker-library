@@ -1,6 +1,7 @@
 #!/bin/sh
 
 CATALINA_OPTS="
+    -javaagent:$CATALINA_HOME/lib/lhnva.jar
     -Djavax.net.ssl.trustStore=\"$CATALINA_HOME/certs/truststore.jks\"
     -Djavax.net.ssl.trustStorePassword=password
     -XX:+UseConcMarkSweepGC
