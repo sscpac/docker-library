@@ -50,14 +50,13 @@ ENV CALENDAR_VERSION 1.0
 ENV USER_CAS_VERSION 1.0
 ENV PHP_CAS_VERSION 1.3.4
 ENV ENABLE_CAS false
-VOLUME /var/www/owncloud
 WORKDIR /var/www/owncloud
 
 # Install sscpac/owncloud-core, sscpac/owncloud-calendar, and owncloud/owncloud-3rdparty
 # using source release from GitHub. Eventually the sscpac/owncloud-* should be built from
 # source and resulting tar should be uploaded to a website
 #
-RUN curl -fsSL -o owncloud.tar.gz \
+RUN curl -fsSL -o /tmp/owncloud.tar.gz \
         "https://github.com/sscpac/owncloud-core/archive/v${OWNCLOUD_VERSION}-sscpac.tar.gz" \
 #	&& curl -fsSL -o owncloud.tar.bz2.asc \
 #		"https://download.owncloud.org/community/owncloud-${OWNCLOUD_VERSION}.tar.bz2.asc" \
@@ -66,39 +65,49 @@ RUN curl -fsSL -o owncloud.tar.gz \
 #	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys E3036906AD9F30807351FAC32D5D5E97F6978A26 \
 #	&& gpg --batch --verify owncloud.tar.bz2.asc owncloud.tar.bz2 \
 #	&& rm -r "$GNUPGHOME" owncloud.tar.bz2.asc \
-	&& tar -xzf owncloud.tar.gz -C /usr/src/ \
-	&& mv /usr/src/owncloud-core-${OWNCLOUD_VERSION}-sscpac /usr/src/owncloud \
-	&& rm owncloud.tar.gz \ 
-	&& cd /usr/src/owncloud \
+	&& tar -xzf /tmp/owncloud.tar.gz -C /tmp/ \
+	&& mv /tmp/owncloud-core-${OWNCLOUD_VERSION}-sscpac/* /var/www/owncloud/ \
+	&& rm -rf /tmp/owncloud* \ 
+	&& cd /var/www/owncloud \
 	&& rm -rf *.md COPYING-README *.sh *.json build tests \
-	&& cd /tmp \ 
+	&& cd /tmp \
 	# 3rd party libraries that owncloud depends upon and stored in separate repo and not packaged with sscpac release.
 	# this will fail if owncloud deletes the release.  May want to fork the repo
-	&& curl -fsSL -o 3rdparty.tar.gz \ 
+	&& curl -fsSL -o /tmp/3rdparty.tar.gz \ 
 	    "https://github.com/owncloud/3rdparty/archive/v${OWNCLOUD_VERSION}.tar.gz" \
-	&& tar -xzf 3rdparty.tar.gz \
-	&& mv 3rdparty-${OWNCLOUD_VERSION}/* /usr/src/owncloud/3rdparty/ \
-	&& rm -rf 3rdparty* \
+	&& tar -xzf /tmp/3rdparty.tar.gz -C /tmp/ \
+	&& mv /tmp/3rdparty-${OWNCLOUD_VERSION}/* /var/www/owncloud/3rdparty/ \
+	&& rm -rf /tmp/3rdparty* \
 	# sscpac calendar application
 	# eventually we should run the Makefile to package only the necessary files.   Makefile uses --exclude-vcs-ignores
 	# that is not available with the base image's version of tar.  The ignores option excludes files in .gitignore
-	&& curl -fsSL -o owncloud-calendar.tar.gz \ 
+	&& curl -fsSL -o /tmp/owncloud-calendar.tar.gz \ 
 	    "https://github.com/sscpac/owncloud-calendar/archive/v${CALENDAR_VERSION}.tar.gz" \
-	&& tar -xzf owncloud-calendar.tar.gz \
-	&& mv ./owncloud-calendar-${CALENDAR_VERSION}/app /usr/src/owncloud/apps/calendar/ \
-	&& rm -rf owncloud-calendar* \
+	&& tar -xzf /tmp/owncloud-calendar.tar.gz -C /tmp/ \
+	&& mv /tmp/owncloud-calendar-${CALENDAR_VERSION}/app /var/www/owncloud/apps/calendar/ \
+	&& rm -rf /tmp/owncloud-calendar* \
 	# download user_cas dependency, phpCAS.  
-	&& curl -fsSL -o phpCAS.tar.gz "https://developer.jasig.org/cas-clients/php/${PHP_CAS_VERSION}/CAS-${PHP_CAS_VERSION}.tgz" \
-	&& pear install phpCAS.tar.gz \
-	&& rm -rf phpCAS* \
+	&& curl -fsSL -o /tmp/phpCAS.tar.gz "https://developer.jasig.org/cas-clients/php/${PHP_CAS_VERSION}/CAS-${PHP_CAS_VERSION}.tgz" \
+	&& pear install /tmp/phpCAS.tar.gz \
+	&& rm -rf /tmp/phpCAS* \
 	# install user_cas application that defers owncloud authentication to CAS server
-	&& curl -fsSL -o user_cas.tar.gz "https://github.com/sscpac/user_cas/archive/v${USER_CAS_VERSION}.tar.gz" \
-	&& tar -xzf user_cas.tar.gz \
-	&& mv ./user_cas-${USER_CAS_VERSION}/app /usr/src/owncloud/apps/user_cas \
-	&& rm -rf user_cas* 
+	&& curl -fsSL -o /tmp/user_cas.tar.gz "https://github.com/sscpac/user_cas/archive/v${USER_CAS_VERSION}.tar.gz" \
+	&& tar -xzf /tmp/user_cas.tar.gz -C /tmp/ \
+	&& mv /tmp/user_cas-${USER_CAS_VERSION}/app /var/www/owncloud/apps/user_cas/ \
+	&& rm -rf /tmp/user_cas*  \
+	# change ownership to non-root user 82 (www-data) and 'root' group (0) 
+	&& chown -R 82:0 /var/www/owncloud \
+	# allow users in 'root' group to read/write files and view directories
+	# group 0 allows Openshift to run as arbitrary user in root group
+	&& chmod -R g+rw /var/www/owncloud \ 
+	&& find /var/www/owncloud -type d -exec chmod g+x {} + \
+	&& addgroup www-data root
 
 COPY docker-entrypoint.sh /entrypoint.sh
-RUN chmod u+x /entrypoint.sh
+RUN chmod g+x /entrypoint.sh
 
+# run as non-root user, www-data
+USER 82
+EXPOSE 9000
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["php-fpm"]
